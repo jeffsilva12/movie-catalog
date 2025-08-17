@@ -11,6 +11,7 @@
         />
       </div>
       <Menubar :model="menuItems" vertical class="border-none h-full" />
+      
     </div>
 
     <!-- Conteúdo Principal -->
@@ -24,7 +25,7 @@
             class="p-button-text"
             v-tooltip="'Mostrar menu'"
           />
-          <span class="ml-3 font-semibold">Administração</span>
+          <!-- <span class="ml-3 font-semibold">Administração</span> -->
         </template>
       </Menubar>
 
@@ -40,9 +41,11 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import Menubar from 'primevue/menubar';
 import Button from 'primevue/button';
+import { useRouter } from 'vue-router'
 
 const sidebarVisible = ref(true);
 const isMobile = ref(false);
+const router = useRouter()
 
 const checkScreenSize = () => {
   isMobile.value = window.innerWidth < 960;
@@ -70,20 +73,19 @@ const menuItems = ref([
   {
     label: 'Dashboard',
     icon: 'pi pi-home',
-    to: '/admin',
-    class: 'mt-1'
+    command: () => router.push('/admin')
   },
   {
-    label: 'Usuários',
-    icon: 'pi pi-users',
-    to: '/admin/users'
+    label: 'Filmes',
+    icon: 'pi pi-video',
+    command: () => router.push('/admin/movies')
   },
   {
     label: 'Configurações',
     icon: 'pi pi-cog',
-    to: '/admin/settings'
+    command: () => router.push('/admin/settings')
   }
-]);
+])
 </script>
 
 <style scoped>
