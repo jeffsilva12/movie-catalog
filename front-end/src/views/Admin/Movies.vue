@@ -1,33 +1,38 @@
-<!-- MovieList.vue -->
 <template>
-  <div>
-    <h2>Lista de Filmes</h2>
+  <div class="container mt-4">
+    <h2 class="mb-4">Lista de Filmes</h2>
 
-    <div v-if="loading">Carregando...</div>
-    <div v-else-if="error">Erro ao buscar filmes: {{ error }}</div>
-    <ul v-else>
-      <li v-for="movie in movies" :key="movie.id">
-        {{ movie.title }}
-      </li>
-    </ul>
+    <div v-if="loading" class="text-muted">Carregando...</div>
+    <div v-else-if="error" class="text-danger">Erro: {{ error }}</div>
+
+    <MovieTable
+      v-else
+      :movies="movies"
+      :onAdd="true"
+      :searchEnabled="true"
+      @add="addToFavorites"
+    />
+
+    <div v-if="successMessage" class="alert alert-success mt-3" role="alert">
+      {{ successMessage }}
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
+import MovieTable from '@/components/MovieTable.vue'
 
-// States
+axios.defaults.baseURL = 'http://movie-catalog/api'
 const movies = ref([])
 const loading = ref(true)
 const error = ref(null)
+const successMessage = ref('')
 
-// Função para buscar filmes
 const fetchMovies = async () => {
   try {
-    const response = await axios.get('http://movie-catalog/api/movies/popular')
-    console.log('Filmes carregados:', response.data);
-    
+    const response = await axios.get('/movies/popular')
     movies.value = response.data
   } catch (err) {
     error.value = err.message || 'Erro desconhecido'
@@ -36,16 +41,19 @@ const fetchMovies = async () => {
   }
 }
 
-// Executa ao montar o componente
 onMounted(fetchMovies)
-</script>
 
-<style scoped>
-ul {
-  list-style: none;
-  padding: 0;
+const addToFavorites = async (movie) => {
+  try {
+    await axios.post('http://movie-catalog/api/add-movie', movie)
+
+    successMessage.value = `Filme "${movie.title}" adicionado aos favoritos!`
+
+    setTimeout(() => {
+      successMessage.value = ''
+    }, 3000)
+  } catch (err) {
+    error.value = `Erro ao adicionar favorito: ${err.message || 'Erro desconhecido'}`
+  }
 }
-li {
-  padding: 5px 0;
-}
-</style>
+</script>
