@@ -1,31 +1,36 @@
 <template>
   <div class="layout-wrapper">
-    <!-- Sidebar Fixo -->
-    <div class="layout-sidebar fixed h-screen" :class="{ 'active': sidebarVisible }">
-      <div class="flex justify-content-end p-2">
-        <Button 
-          icon="pi pi-times" 
-          @click="toggleSidebar"
-          class="p-button-text p-button-sm lg:hidden"
-          v-tooltip="'Ocultar menu'"
+    <!-- Sidebar via PrimeVue Sidebar -->
+    <Sidebar
+      v-model:visible="sidebarVisible"
+      position="left"
+      :modal="isMobile"
+      dismissable
+      :style="{ width: isMobile ? '100%' : '18rem' }"
+      class="layout-sidebar"
+    >
+      <div class="p-px-3 p-pt-2 flex justify-content-end">
+        <Button
+          icon=""
+          class="p-button-text p-button-sm"
+          @click="sidebarVisible = false"
+          v-tooltip="'Fechar menu'"
         />
       </div>
-      <Menubar :model="menuItems" vertical class="border-none h-full" />
-      
-    </div>
+      <Menubar :model="menuItems" vertical class="border-none" />
+    </Sidebar>
 
     <!-- Conteúdo Principal -->
     <div class="layout-main">
-      <!-- Topbar (apenas quando sidebar estiver oculto) -->
+      <!-- Topbar mobile -->
       <Menubar class="layout-topbar" v-if="!sidebarVisible">
         <template #start>
-          <Button 
-            icon="pi pi-bars" 
-            @click="toggleSidebar"
+          <Button
+            icon="pi pi-bars"
             class="p-button-text"
-            v-tooltip="'Mostrar menu'"
+            @click="sidebarVisible = true"
+            v-tooltip="'Abrir menu'"
           />
-          <!-- <span class="ml-3 font-semibold">Administração</span> -->
         </template>
       </Menubar>
 
@@ -37,54 +42,33 @@
   </div>
 </template>
 
+
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
+import Sidebar from 'primevue/sidebar';
 import Menubar from 'primevue/menubar';
 import Button from 'primevue/button';
-import { useRouter } from 'vue-router'
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 const sidebarVisible = ref(true);
 const isMobile = ref(false);
-const router = useRouter()
 
 const checkScreenSize = () => {
   isMobile.value = window.innerWidth < 960;
-  if (isMobile.value) {
-    sidebarVisible.value = false;
-  } else {
-    sidebarVisible.value = true;
-  }
-};
-
-const toggleSidebar = () => {
-  sidebarVisible.value = !sidebarVisible.value;
+  sidebarVisible.value = !isMobile.value;
 };
 
 onMounted(() => {
   checkScreenSize();
   window.addEventListener('resize', checkScreenSize);
 });
-
 onBeforeUnmount(() => {
   window.removeEventListener('resize', checkScreenSize);
 });
 
-const menuItems = ref([
-  {
-    label: 'Favoritos',
-    icon: 'pi pi-star',
-    command: () => router.push('/admin')
-  },
-  {
-    label: 'Filmes',
-    icon: 'pi pi-video',
-    command: () => router.push('/admin/movies')
-  },
-  // {
-  //   label: 'Configurações',
-  //   icon: 'pi pi-cog',
-  //   command: () => router.push('/admin/settings')
-  // }
-])
+const menuItems = [
+  { label: 'Favoritos', icon: 'pi pi-star', command: () => router.push('/admin') },
+  { label: 'Filmes', icon: 'pi pi-video', command: () => router.push('/admin/movies') }
+];
 </script>
-
