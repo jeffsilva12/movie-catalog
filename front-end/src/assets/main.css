@@ -163,10 +163,6 @@ nav a:first-of-type {
     margin: 0 2rem 0 0;
   }
 
-  header .wrapper {
-
-  }
-
   nav {
     text-align: left;
     margin-left: -1rem;
@@ -175,4 +171,30 @@ nav a:first-of-type {
     padding: 1rem 0;
     margin-top: 1rem;
   }
+}
+
+.image-logo {
+  height: 120px !important;
+  width: 250px;
+}
+
+.btn-danger {
+  transition: transform 0.2s;
+}
+
+.btn-danger:hover {
+  transform: scale(1.05);
+}
+
+.btn-success {
+  transition: transform 0.2s;
+}
+
+.btn-success:hover {
+  transform: scale(1.1);
+}
+
+.page-item.active .page-link {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
 }

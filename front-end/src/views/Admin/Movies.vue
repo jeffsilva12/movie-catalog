@@ -5,13 +5,7 @@
     <div v-if="loading" class="text-muted">Carregando...</div>
     <div v-else-if="error" class="text-danger">Erro: {{ error }}</div>
 
-    <MovieTable
-      v-else
-      :movies="movies"
-      :onAdd="true"
-      :searchEnabled="true"
-      @add="addToFavorites"
-    />
+    <MovieTable v-else :movies="movies" :onAdd="true" :searchEnabled="true" @add="addToFavorites" />
 
     <div v-if="successMessage" class="alert alert-success mt-3" role="alert">
       {{ successMessage }}
@@ -44,16 +38,26 @@ const fetchMovies = async () => {
 onMounted(fetchMovies)
 
 const addToFavorites = async (movie) => {
-  try {
-    await axios.post('http://movie-catalog/api/add-movie', movie)
+  try {    
+    const response = await axios.post('http://movie-catalog/api/add-movie', movie);
+    
+    if (response.status === 200 || response.status === 201) {
+      successMessage.value = `🎬 Filme "${movie.title}" adicionado aos favoritos!`;
+      
+      movie.status = true;
+    } else {
+      throw new Error(response.data.message || 'Erro inesperado ao adicionar');
+    }
 
-    successMessage.value = `Filme "${movie.title}" adicionado aos favoritos!`
-
+  } catch (err) {    
+    console.error('Erro ao adicionar filme:', err);
+    error.value = `❌ Erro ao adicionar "${movie.title}": ${err.response?.data?.message || err.message || 'Erro desconhecido'}`;
+  } finally {    
     setTimeout(() => {
-      successMessage.value = ''
-    }, 3000)
-  } catch (err) {
-    error.value = `Erro ao adicionar favorito: ${err.message || 'Erro desconhecido'}`
+      successMessage.value = '';
+      error.value = '';
+    }, 3000);
   }
-}
+};
+
 </script>

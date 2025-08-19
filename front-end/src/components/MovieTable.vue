@@ -2,13 +2,8 @@
   <div class="table-responsive">
     <!-- Campo de busca -->
     <div v-if="searchEnabled" class="mb-3">
-      <input
-        type="text"
-        class="form-control"
-        placeholder="Buscar por título, gênero ou ano..."
-        v-model="searchQuery"
-        @input="resetPagination"
-      />
+      <input type="text" class="form-control" placeholder="Buscar por título, gênero ou ano..." v-model="searchQuery"
+        @input="resetPagination" />
     </div>
 
     <!-- Tabela -->
@@ -25,13 +20,8 @@
       <tbody>
         <tr v-for="(movie, index) in paginatedMovies" :key="movie.id || index">
           <td class="text-center">
-            <img
-              v-if="movie.poster_path"
-              :src="'https://image.tmdb.org/t/p/w200' + movie.poster_path"
-              :alt="movie.title"
-              class="img-thumbnail"
-              style="max-width: 80px"
-            />
+            <img v-if="movie.poster_path" :src="'https://image.tmdb.org/t/p/w200' + movie.poster_path"
+              :alt="movie.title" class="img-thumbnail" style="max-width: 80px" />
             <span v-else class="text-muted">Sem imagem</span>
           </td>
           <td>{{ movie.title || 'N/A' }}</td>
@@ -45,24 +35,30 @@
             </span>
           </td>
           <td>
-            {{ movie.release_date ? formatDate(movie.release_date) : 'N/A' }}
+            {{ movie.release_date ? movie.release_date.substring(0, 4) : 'N/A' }}
           </td>
           <td class="text-center">
-            <button
-              v-if="onRemove"
-              class="btn btn-danger btn-sm me-2"
-              @click="confirmRemove(movie)"
-              :disabled="!movie.id"
-            >
-              <i class="fa fa-trash me-1"></i> Excluir
-            </button>
-            <button
-              v-if="onAdd"
-              class="btn btn-success btn-sm"
+            
+            <Button v-if="onRemove" icon="pi pi-trash" label="Excluir" class="p-button-danger p-button-sm me-2"
+              @click="confirmRemove(movie)" :disabled="!movie.id" />
+
+            <!-- Se movie.status existir, mostra "Adicionado" em amarelo -->
+            <Button
+              v-if="onAdd && movie.status"
+              icon="pi pi-check"
+              label="Adicionado"
+              class="p-button-warning p-button-sm"
+              disabled
+            />
+            
+            <Button
+              v-else-if="onAdd"
+              icon="pi pi-plus"
+              label="Adicionar"
+              class="p-button-success p-button-sm"
               @click="confirmAdd(movie)"
-            >
-              + Adicionar
-            </button>
+            />
+
           </td>
         </tr>
       </tbody>
@@ -79,12 +75,7 @@
         <li class="page-item" :class="{ disabled: currentPage === 1 }">
           <button class="page-link" @click="prevPage">&laquo;</button>
         </li>
-        <li
-          class="page-item"
-          v-for="page in pages"
-          :key="page"
-          :class="{ active: page === currentPage }"
-        >
+        <li class="page-item" v-for="page in pages" :key="page" :class="{ active: page === currentPage }">
           <button class="page-link" @click="goToPage(page)">{{ page }}</button>
         </li>
         <li class="page-item" :class="{ disabled: currentPage === totalPages }">
@@ -98,6 +89,8 @@
 <script>
 import Swal from 'sweetalert2';
 import axios from 'axios';
+import Button from 'primevue/button';
+
 
 export default {
   name: 'MovieTable',
@@ -234,22 +227,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.btn-danger {
-  transition: transform 0.2s;
-}
-.btn-danger:hover {
-  transform: scale(1.05);
-}
-.btn-success {
-  transition: transform 0.2s;
-}
-.btn-success:hover {
-  transform: scale(1.1);
-}
-.page-item.active .page-link {
-  background-color: #0d6efd;
-  border-color: #0d6efd;
-}
-</style>

@@ -16,6 +16,7 @@ class FavoriteMovie extends Model
         'tmdb_id',
         'title',
         'poster_path',
+        'genres',
         'release_date',
         'overview'
     ];

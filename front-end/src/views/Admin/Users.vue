@@ -113,8 +113,7 @@ const confirmDelete = (data) => {
   deleteDialog.value = true;
 };
 
-const saveUser = () => {
-  // Simulação (substitua pela API)
+const saveUser = () => {  
   if (user.value.id) {
     const index = users.value.findIndex(u => u.id === user.value.id);
     users.value[index] = { ...user.value };

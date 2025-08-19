@@ -1,40 +1,25 @@
 <template>
   <div class="layout-wrapper">
-    <!-- Sidebar via PrimeVue Sidebar -->
-    <Sidebar
-      v-model:visible="sidebarVisible"
-      position="left"
-      :modal="isMobile"
-      dismissable
-      :style="{ width: isMobile ? '100%' : '18rem' }"
-      class="layout-sidebar"
-    >
-      <div class="p-px-3 p-pt-2 flex justify-content-end">
-        <Button
-          icon=""
-          class="p-button-text p-button-sm"
-          @click="sidebarVisible = false"
-          v-tooltip="'Fechar menu'"
-        />
+
+    <Sidebar v-model:visible="sidebarVisible" position="left" :modal="isMobile" dismissable
+      :style="{ width: isMobile ? '100%' : '18rem' }" class="layout-sidebar">
+      <div class="sidebar-logo text-center p-0">
+        <router-link to="/">
+          <img src="@/assets/logo1.jpg" alt="Logo" class="img-fluid image-logo" />
+        </router-link>
       </div>
+
+
       <Menubar :model="menuItems" vertical class="border-none" />
     </Sidebar>
 
-    <!-- Conteúdo Principal -->
     <div class="layout-main">
-      <!-- Topbar mobile -->
       <Menubar class="layout-topbar" v-if="!sidebarVisible">
         <template #start>
-          <Button
-            icon="pi pi-bars"
-            class="p-button-text"
-            @click="sidebarVisible = true"
-            v-tooltip="'Abrir menu'"
-          />
+          <Button icon="pi pi-bars" class="p-button-text" @click="sidebarVisible = true" v-tooltip="'Abrir menu'" />
         </template>
       </Menubar>
 
-      <!-- Área de Conteúdo -->
       <div class="layout-content">
         <router-view />
       </div>
@@ -68,7 +53,7 @@ onBeforeUnmount(() => {
 });
 
 const menuItems = [
-  { label: 'Favoritos', icon: 'pi pi-star', command: () => router.push('/admin') },
-  { label: 'Filmes', icon: 'pi pi-video', command: () => router.push('/admin/movies') }
+  { label: 'Filmes Favoritos', icon: 'pi pi-star', command: () => router.push('/favorite-movies') },
+  { label: 'Filmes', icon: 'pi pi-video', command: () => router.push('/movies') }
 ];
 </script>

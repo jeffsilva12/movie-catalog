@@ -24,8 +24,7 @@ import Button from 'primevue/button';
 const router = useRouter();
 const form = ref({ email: '', password: '' });
 
-const handleLogin = () => {
-  // Simulando login (substitua pela chamada real ao Laravel)
+const handleLogin = () => {  
   if (form.value.email && form.value.password) {
     router.push('/admin');
   }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\FavoriteMovie;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class MovieController extends Controller
 {
@@ -20,6 +21,7 @@ class MovieController extends Controller
         ]);
 
         $movies = $response->json('results') ?? [];
+
 
         $genreMap = $this->getGenreMap();
 
@@ -38,29 +40,26 @@ class MovieController extends Controller
 
     public function myFavoriteMovies()
     {
-        $favorite_movies = FavoriteMovie::all()->toArray();
-
-        $genreMap = $this->getGenreMap();
-
-        $movies = array_map(function ($movie) use ($genreMap) {
-            $movie['genre_names'] = collect(json_decode($movie['genre_ids'] ?? '[]', true))
-                ->map(fn($id) => $genreMap[$id] ?? 'Desconhecido')
-                ->all();
+        $movies = FavoriteMovie::all()->map(function ($movie) {
+            $movie->genre_names = is_array($movie->genres)
+                ? $movie->genres // já são os nomes!
+                : json_decode($movie->genres, true); // fallback caso esteja em string JSON
 
             return $movie;
-        }, $favorite_movies);
+        });
 
         return response()->json($movies);
     }
 
+
     public function addFavoriteMovies(Request $request)
     {
-        // Salva os nomes dos gêneros diretamente enviados pelo frontend
+        Log::info('📦 Dados recebidos:', $request->all());
         $movie = FavoriteMovie::updateOrCreate(
             ['tmdb_id' => $request->id],
             [
                 'title' => $request->title,
-                'genres' => $request->genre_names, // já contém os nomes dos gêneros
+                'genres' => json_encode($request->genre_names),
                 'poster_path' => $request->poster_path,
                 'release_date' => $request->release_date ?? null,
             ]
