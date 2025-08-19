@@ -165,11 +165,6 @@ O backend estará disponível em:
    npm run dev
    ```
 
-O frontend estará disponível em:
-👉 [http://localhost:5173](http://localhost:5173)
-
----
-
 ## 🎯 Funcionalidades
 
 * 🔍 **Buscar filmes** pelo nome
@@ -189,11 +184,6 @@ Datas de lançamento dos filmes são exibidas no formato **brasileiro (DD/MM/YYY
 4. Acessar a aplicação pelo navegador
 
 ---
-
-## 📸 Prints 
-
-Se quiser incluir imagens de demonstração no README:
-
 
 
 ## 👨‍💻 Autor
