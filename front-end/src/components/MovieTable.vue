@@ -1,13 +1,13 @@
-<!-- components/MovieTable.vue -->
 <template>
   <div class="table-responsive">
-    <!-- Campo de busca opcional -->
+    <!-- Campo de busca -->
     <div v-if="searchEnabled" class="mb-3">
       <input
         type="text"
         class="form-control"
         placeholder="Buscar por título, gênero ou ano..."
         v-model="searchQuery"
+        @input="resetPagination"
       />
     </div>
 
@@ -23,7 +23,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="movie in filteredMovies" :key="movie.id">
+        <tr v-for="(movie, index) in paginatedMovies" :key="movie.id || index">
           <td class="text-center">
             <img
               v-if="movie.poster_path"
@@ -34,73 +34,222 @@
             />
             <span v-else class="text-muted">Sem imagem</span>
           </td>
-          <td>{{ movie.title }}</td>
-          <td>{{ movie.genres || 'N/A' }}</td>
-          <td>{{ movie.release_date ? new Date(movie.release_date).toLocaleDateString('pt-BR') : 'N/A' }}</td>
+          <td>{{ movie.title || 'N/A' }}</td>
+          <td>
+            <!-- Mostra os nomes dos gêneros separados por vírgula -->
+            <span v-if="Array.isArray(movie.genre_names)">
+              {{ movie.genre_names.join(', ') }}
+            </span>
+            <span v-else>
+              {{ movie.genre_names || 'N/A' }}
+            </span>
+          </td>
+          <td>
+            {{ movie.release_date ? formatDate(movie.release_date) : 'N/A' }}
+          </td>
           <td class="text-center">
-            <!-- Botão de ação customizável -->
             <button
               v-if="onRemove"
               class="btn btn-danger btn-sm me-2"
-              @click="$emit('remove', movie.id)"
+              @click="confirmRemove(movie)"
+              :disabled="!movie.id"
             >
-              Remover
+              <i class="fa fa-trash me-1"></i> Excluir
             </button>
             <button
               v-if="onAdd"
               class="btn btn-success btn-sm"
-              @click="$emit('add', movie)"
+              @click="confirmAdd(movie)"
             >
-              +
+              + Adicionar
             </button>
           </td>
         </tr>
       </tbody>
     </table>
 
+    <!-- Mensagem vazia -->
     <div v-if="filteredMovies.length === 0" class="alert alert-warning mt-3">
       Nenhum filme encontrado.
     </div>
+
+    <!-- Paginação -->
+    <nav v-if="filteredMovies.length > 0 && totalPages > 1">
+      <ul class="pagination justify-content-center">
+        <li class="page-item" :class="{ disabled: currentPage === 1 }">
+          <button class="page-link" @click="prevPage">&laquo;</button>
+        </li>
+        <li
+          class="page-item"
+          v-for="page in pages"
+          :key="page"
+          :class="{ active: page === currentPage }"
+        >
+          <button class="page-link" @click="goToPage(page)">{{ page }}</button>
+        </li>
+        <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+          <button class="page-link" @click="nextPage">&raquo;</button>
+        </li>
+      </ul>
+    </nav>
   </div>
 </template>
 
 <script>
+import Swal from 'sweetalert2';
+import axios from 'axios';
+
 export default {
-  name: "MovieTable",
+  name: 'MovieTable',
   props: {
     movies: {
       type: Array,
       required: true,
+      default: () => []
     },
     searchEnabled: {
       type: Boolean,
-      default: true,
+      default: true
     },
     onRemove: {
       type: Boolean,
-      default: false,
+      default: false
     },
     onAdd: {
       type: Boolean,
-      default: false,
+      default: false
     },
+    itemsPerPage: {
+      type: Number,
+      default: 10,
+      validator: value => value > 0
+    }
   },
   data() {
     return {
-      searchQuery: "",
+      searchQuery: '',
+      currentPage: 1
     };
   },
   computed: {
     filteredMovies() {
-      const q = this.searchQuery.toLowerCase();
-      return this.movies.filter((movie) => {
-        return (
-          movie.title?.toLowerCase().includes(q) ||
-          movie.genres?.toLowerCase().includes(q) ||
-          movie.release_date?.toString().includes(q)
-        );
+      const query = this.searchQuery.toLowerCase();
+      return this.movies.filter(movie => {
+        const title = String(movie.title || '').toLowerCase();
+        const genres = Array.isArray(movie.genre_names)
+          ? movie.genre_names.join(', ').toLowerCase()
+          : String(movie.genre_names || '').toLowerCase();
+        const year = String(movie.release_date || '');
+
+        return title.includes(query) || genres.includes(query) || year.includes(query);
       });
     },
+    paginatedMovies() {
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      return this.filteredMovies.slice(start, start + this.itemsPerPage);
+    },
+    totalPages() {
+      return Math.ceil(this.filteredMovies.length / this.itemsPerPage);
+    },
+    pages() {
+      const maxVisible = 5;
+      let start = Math.max(1, this.currentPage - Math.floor(maxVisible / 2));
+      let end = Math.min(this.totalPages, start + maxVisible - 1);
+
+      if (end - start + 1 < maxVisible) {
+        start = Math.max(1, end - maxVisible + 1);
+      }
+
+      return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+    }
   },
+  watch: {
+    filteredMovies() {
+      if (this.currentPage > this.totalPages && this.totalPages > 0) {
+        this.currentPage = this.totalPages;
+      }
+    }
+  },
+  methods: {
+    formatDate(dateString) {
+      try {
+        return new Date(dateString).toLocaleDateString('pt-BR');
+      } catch {
+        return dateString;
+      }
+    },
+    resetPagination() {
+      this.currentPage = 1;
+    },
+    prevPage() {
+      if (this.currentPage > 1) this.currentPage--;
+    },
+    nextPage() {
+      if (this.currentPage < this.totalPages) this.currentPage++;
+    },
+    goToPage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page;
+      }
+    },
+    confirmRemove(movie) {
+      Swal.fire({
+        title: 'Tem certeza?',
+        text: `Você está prestes a excluir "${movie.title}"`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sim, excluir!',
+        cancelButtonText: 'Cancelar'
+      }).then(result => {
+        if (result.isConfirmed) {
+          axios.delete(`http://movie-catalog/api/favorite/movies/${movie.id}`)
+            .then(() => {
+              this.$emit('remove', movie.id); // componente pai deve lidar com atualização
+              this.showToast('Sucesso!', 'Filme excluído com sucesso.', 'success');
+            })
+            .catch(error => {
+              console.error('Erro ao excluir filme:', error);
+              this.showToast('Erro', 'Não foi possível excluir o filme.', 'error');
+            });
+        }
+      });
+    },
+    confirmAdd(movie) {
+      this.$emit('add', movie);
+      this.showToast('Sucesso!', 'Filme adicionado com sucesso.', 'success');
+    },
+    showToast(title, text, icon) {
+      Swal.fire({
+        title,
+        text,
+        icon,
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000
+      });
+    }
+  }
 };
 </script>
+
+<style scoped>
+.btn-danger {
+  transition: transform 0.2s;
+}
+.btn-danger:hover {
+  transform: scale(1.05);
+}
+.btn-success {
+  transition: transform 0.2s;
+}
+.btn-success:hover {
+  transform: scale(1.1);
+}
+.page-item.active .page-link {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+</style>

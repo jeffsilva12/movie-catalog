@@ -4,8 +4,7 @@
     
     <MovieTable 
       :movies="movies" 
-      :onRemove="true"
-      @remove="removeFavorite"
+      :onRemove="true"      
     />
   </div>
 </template>
@@ -36,11 +35,7 @@ export default {
           this.loading = false;
         });
     },
-    removeFavorite(id) {
-      if (!confirm("Deseja realmente remover este filme?")) return;
-      axios.delete(`http://movie-catalog/api/favorite/movies/${id}`)
-        .then(() => this.loadFavorites());
-    }
+    
   },
   mounted() {
     this.loadFavorites();

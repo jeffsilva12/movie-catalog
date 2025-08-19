@@ -10,52 +10,79 @@ class MovieController extends Controller
 {
     public function popular()
     {
+
+        $favorite_movies_ids = FavoriteMovie::pluck('tmdb_id')->toArray();
+
         $response = Http::get("https://api.themoviedb.org/3/movie/popular", [
             'api_key' => env('TMDB_API_KEY'),
             'language' => 'pt-BR',
             'page' => 1
         ]);
 
-        return $response->json('results');
+        $movies = $response->json('results') ?? [];
+
+        $genreMap = $this->getGenreMap();
+
+        return $movies = array_map(function ($movie) use ($genreMap, $favorite_movies_ids) {
+            if (in_array($movie['id'], $favorite_movies_ids)) {
+                $movie['status'] = 'adicionado';
+            }
+
+            $movie['genre_names'] = collect($movie['genre_ids'] ?? [])
+                ->map(fn($id) => $genreMap[$id] ?? 'Desconhecido')
+                ->all();
+
+            return $movie;
+        }, $movies);
     }
 
     public function myFavoriteMovies()
     {
-        $response = FavoriteMovie::all();        
+        $favorite_movies = FavoriteMovie::all()->toArray();
 
-        return response()->json($response);
+        $genreMap = $this->getGenreMap();
+
+        $movies = array_map(function ($movie) use ($genreMap) {
+            $movie['genre_names'] = collect(json_decode($movie['genre_ids'] ?? '[]', true))
+                ->map(fn($id) => $genreMap[$id] ?? 'Desconhecido')
+                ->all();
+
+            return $movie;
+        }, $favorite_movies);
+
+        return response()->json($movies);
     }
+
     public function addFavoriteMovies(Request $request)
     {
-        $genreMap = $this->getGenreMap(); // você já deve ter essa função
-
-        $genreNames = collect($request->genre_ids)
-            ->map(fn($id) => $genreMap[$id] ?? null)
-            ->filter()
-            ->values()
-            ->toArray();
-
+        // Salva os nomes dos gêneros diretamente enviados pelo frontend
         $movie = FavoriteMovie::updateOrCreate(
             ['tmdb_id' => $request->id],
             [
                 'title' => $request->title,
-                'genres' => $genreNames,
+                'genres' => $request->genre_names, // já contém os nomes dos gêneros
                 'poster_path' => $request->poster_path,
+                'release_date' => $request->release_date ?? null,
             ]
         );
 
-        return response()->json(['message' => 'Filme salvo com sucesso!', 'movie' => $movie]);
+        return response()->json([
+            'message' => 'Filme salvo com sucesso!',
+            'movie' => $movie
+        ]);
     }
+
 
     private function getGenreMap()
     {
-        $token = env('TMDB_BEARER_TOKEN');
-
-        $response = Http::withToken($token)->get('https://api.themoviedb.org/3/genre/movie/list', [
-            'language' => 'pt-BR',
+        $response = Http::get("https://api.themoviedb.org/3/genre/movie/list", [
+            'api_key' => env('TMDB_API_KEY'),
+            'language' => 'pt-BR'
         ]);
 
-        return collect($response->json('genres'))->pluck('name', 'id')->toArray();
+        $genres = $response->json('genres') ?? [];
+
+        return collect($genres)->pluck('name', 'id')->toArray();
     }
 
 
@@ -69,7 +96,6 @@ class MovieController extends Controller
                 'sort_by' => 'created_at.asc',
             ]);
 
-        // Se quiser apenas retornar os resultados em JSON:
         return response()->json($response->json('results'));
     }
 

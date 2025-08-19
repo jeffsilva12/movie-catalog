@@ -71,8 +71,8 @@ onBeforeUnmount(() => {
 
 const menuItems = ref([
   {
-    label: 'Dashboard',
-    icon: 'pi pi-home',
+    label: 'Favoritos',
+    icon: 'pi pi-star',
     command: () => router.push('/admin')
   },
   {
@@ -80,11 +80,11 @@ const menuItems = ref([
     icon: 'pi pi-video',
     command: () => router.push('/admin/movies')
   },
-  {
-    label: 'Configurações',
-    icon: 'pi pi-cog',
-    command: () => router.push('/admin/settings')
-  }
+  // {
+  //   label: 'Configurações',
+  //   icon: 'pi pi-cog',
+  //   command: () => router.push('/admin/settings')
+  // }
 ])
 </script>
 
