@@ -5,8 +5,7 @@
       <input type="text" class="form-control" placeholder="Buscar por título, gênero ou ano..." v-model="searchQuery"
         @input="resetPagination" />
     </div>
-
-    <!-- Tabela -->
+    
     <table class="table table-striped table-bordered">
       <thead class="table-dark">
         <tr>
@@ -25,8 +24,7 @@
             <span v-else class="text-muted">Sem imagem</span>
           </td>
           <td>{{ movie.title || 'N/A' }}</td>
-          <td>
-            <!-- Mostra os nomes dos gêneros separados por vírgula -->
+          <td>            
             <span v-if="Array.isArray(movie.genre_names)">
               {{ movie.genre_names.join(', ') }}
             </span>
@@ -41,8 +39,7 @@
             
             <Button v-if="onRemove" icon="pi pi-trash" label="Excluir" class="p-button-danger p-button-sm me-2"
               @click="confirmRemove(movie)" :disabled="!movie.id" />
-
-            <!-- Se movie.status existir, mostra "Adicionado" em amarelo -->
+            
             <Button
               v-if="onAdd && movie.status"
               icon="pi pi-check"
@@ -63,13 +60,11 @@
         </tr>
       </tbody>
     </table>
-
-    <!-- Mensagem vazia -->
+    
     <div v-if="filteredMovies.length === 0" class="alert alert-warning mt-3">
       Nenhum filme encontrado.
     </div>
-
-    <!-- Paginação -->
+    
     <nav v-if="filteredMovies.length > 0 && totalPages > 1">
       <ul class="pagination justify-content-center">
         <li class="page-item" :class="{ disabled: currentPage === 1 }">
