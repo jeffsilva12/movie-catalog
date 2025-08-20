@@ -153,13 +153,7 @@ O backend estará disponível em:
    npm install
    ```
 
-3. Configure o arquivo `.env` do frontend para apontar para o backend:
-
-   ```env
-   VITE_API_URL=http://movie-catalog/api
-   ```
-
-4. Rode o servidor de desenvolvimento:
+3. Rode o servidor de desenvolvimento:
 
    ```bash
    npm run dev
