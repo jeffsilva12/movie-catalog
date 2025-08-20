@@ -185,6 +185,43 @@ Datas de lançamento dos filmes são exibidas no formato **brasileiro (DD/MM/YYY
 
 ---
 
+## 🔑 Como Obter a Chave da API do TMDB
+
+```bash
+1. Acesse o site oficial do TMDB:
+   https://www.themoviedb.org/
+
+2. Crie uma Conta:
+   - Clique em "Entrar" no canto superior direito e depois em "Cadastrar-se".
+   - Preencha as informações necessárias para criar uma conta gratuita.
+
+3. Acesse as Configurações da API:
+   - Após fazer login, clique na sua foto de perfil no canto superior direito.
+   - No menu que aparece, selecione **Configurações**.
+
+4. Solicite uma Chave de API:
+   - Na página de configurações, vá até a seção **API** na barra lateral esquerda.
+   - Clique em **Solicitar uma chave de API**.
+   - Selecione a opção **Developer** quando perguntado sobre o tipo de uso.
+
+5. Preencha o Formulário de Inscrição:
+   - **URL do site:** http://localhost:3000 (ou a porta do seu projeto local)
+   - **Descrição da Aplicação:** Forneça uma breve descrição do seu projeto (ex: "App pessoal para descobrir filmes").
+   - Aceite os Termos de Uso e clique em **Enviar**.
+
+6. Copie sua Chave de API:
+   - Após a aprovação (geralmente instantânea), você será redirecionado para a página da sua API.
+   - Lá estará a seção **API Key (v3 auth)** → copie esse valor.
+
+```
+
+## Adicionar chave ao projeto
+```bash
+Adicione a seguinte linha, colando a chave que você copiou no .env do back-end:
+TMDB_API_KEY=sua_chave_api_aqui_123
+
+````
+
 
 ## 👨‍💻 Autor
 
